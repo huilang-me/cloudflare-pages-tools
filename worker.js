@@ -97,6 +97,7 @@ function generateHTML() {
       transition: opacity 0.3s;
       z-index: 999;
       font-size: 0.95em;
+      pointer-events: none;
     }
 
     #toast.show {
@@ -147,6 +148,7 @@ function generateHTML() {
   <footer>
     <p>🔒 本工具不会收集或上传任何用户数据，所有生成记录仅保存在您的浏览器 <code>localStorage</code> 中。</p>
     <p>⚠️ 请妥善保管生成的密码和 UUID，本站无法恢复历史或数据。</p>
+    <p>🔗 <a href="https://github.com/huilang-me/genpass-uuid-cloudflare-worker/" target="_blank">查看项目主页</a></p>
   </footer>
 
   <script>

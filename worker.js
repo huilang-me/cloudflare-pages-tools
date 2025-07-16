@@ -13,16 +13,77 @@ function generateHTML() {
 <head>
   <meta charset="UTF-8">
   <title>密码 / UUID 生成器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 2em; max-width: 700px; margin: auto; background: #f9f9f9; }
-    h1 { color: #333; }
-    form { background: #fff; padding: 1em; margin-bottom: 2em; border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-    label { display: block; margin-top: 0.5em; }
-    input[type="number"] { width: 60px; }
-    .result { margin: 1em 0; font-size: 1.2em; }
-    ul { padding-left: 1em; }
-    code { background: #eee; padding: 3px 6px; border-radius: 5px; }
-    button { margin-top: 0.5em; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 1.5em;
+      max-width: 700px;
+      margin: auto;
+      background: #f9f9f9;
+      color: #333;
+    }
+    h1 { font-size: 1.8em; text-align: center; margin-bottom: 1em; }
+
+    form {
+      background: #fff;
+      padding: 1em;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.08);
+      margin-bottom: 2em;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      margin: 0.5em 0;
+      font-size: 1em;
+    }
+
+    input[type="number"] {
+      width: 80px;
+      padding: 5px;
+    }
+
+    button {
+      margin-top: 1em;
+      margin-right: 0.5em;
+      padding: 0.25em .6em;
+      font-size: 12px;
+      border: none;
+      border-radius: 3px;
+      background: #007aff;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #005fcc;
+    }
+
+    .result {
+      margin: 1.5em 0;
+      font-size: 1.2em;
+    }
+
+    ul {
+      padding-left: 1em;
+      list-style: none;
+    }
+
+    li {
+      margin-bottom: 0.5em;
+      word-break: break-all;
+    }
+
+    code {
+      background: #eee;
+      padding: 3px 6px;
+      border-radius: 5px;
+    }
+
     #toast {
       position: fixed;
       bottom: 20px;
@@ -35,9 +96,28 @@ function generateHTML() {
       opacity: 0;
       transition: opacity 0.3s;
       z-index: 999;
+      font-size: 0.95em;
     }
+
     #toast.show {
       opacity: 1;
+    }
+
+    footer {
+      margin-top: 3em;
+      padding-top: 1em;
+      font-size: 0.9em;
+      color: #666;
+      border-top: 1px solid #ddd;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 1em; font-size: 1em; }
+      button { margin-top: 0.7em; }
+      form label { flex-direction: row; flex-wrap: wrap; }
+      .result { word-break: break-word; }
     }
   </style>
 </head>
@@ -46,11 +126,13 @@ function generateHTML() {
 
   <form id="generatorForm">
     <h3>密码生成设置</h3>
-    <label>长度：<input type="number" id="length" value="12" min="4" max="64"></label>
+    <label>长度：
+      <input type="number" id="length" value="12" min="4" max="64">
+    </label>
     <label><input type="checkbox" id="upper" checked> 包含大写字母</label>
     <label><input type="checkbox" id="lower" checked> 包含小写字母</label>
     <label><input type="checkbox" id="number" checked> 包含数字</label>
-    <label><input type="checkbox" id="symbol"> 包含符号</label>
+    <label><input type="checkbox" id="symbol" checked> 包含符号</label>
     <button type="button" onclick="generatePassword()">生成密码</button>
     <button type="button" onclick="generateUUID()">生成 UUID</button>
   </form>
@@ -61,6 +143,11 @@ function generateHTML() {
   <ul id="history"></ul>
 
   <div id="toast">已复制到剪贴板</div>
+
+  <footer>
+    <p>🔒 本工具不会收集或上传任何用户数据，所有生成记录仅保存在您的浏览器 <code>localStorage</code> 中。</p>
+    <p>⚠️ 请妥善保管生成的密码和 UUID，本站无法恢复历史或数据。</p>
+  </footer>
 
   <script>
     function generatePassword() {
@@ -142,10 +229,11 @@ function generateHTML() {
     function clearHistory() {
       localStorage.removeItem('history');
       renderHistory([]);
+      document.getElementById('output').innerHTML = '';
       showToast("历史记录已清除");
     }
 
-    // 初始化历史
+    // 初始化历史记录显示
     renderHistory();
   </script>
 </body>

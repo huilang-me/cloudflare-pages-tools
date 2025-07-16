@@ -17,7 +17,7 @@
 
 ## 📦 在线演示
 
-部署后访问 `[https://tools.tmpple.workers.dev/](https://tools.tmpple.workers.dev/)` 即可使用。  
+部署后访问 [https://tools.tmpple.workers.dev/](https://tools.tmpple.workers.dev/) 即可使用。  
 如你尚未部署，请参考下方安装说明。
 
 ---

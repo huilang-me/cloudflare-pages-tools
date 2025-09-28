@@ -1,11 +1,14 @@
 export default {
-  async fetch(request) {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    const host = url.hostname;
+    const path = url.pathname;
 
     // 条件1: 子域名前缀是 ip.
     const isIPSubdomain = host.startsWith("ip.");
 
-    // 条件2: 路径是 /ip 或 /ip/xxx
-    const isIPPath = path === "/ip" || path.startsWith("/ip/");
+    // 条件2: 路径是 /ip
+    const isIPPath = path === "/ip";
 
     if (isIPSubdomain || isIPPath) {
       return getIPInfo(request);
@@ -19,30 +22,50 @@ export default {
 
 function getIPInfo(request) {
   const url = new URL(request.url);
-  const queryIP = url.searchParams.get("ip");
+  const params = url.searchParams;
+  
+  const ip = request.headers.get("cf-connecting-ip");
+  const ua = request.headers.get("user-agent") || null;
 
-  let ip = queryIP || request.headers.get("cf-connecting-ip");
   const cf = request.cf || {};
-
-  const data = {
+  const fullData = {
     ip: ip,
+    ua: ua,
     asn: cf.asn || null,
     org: cf.asOrganization || null,
     country: cf.country || null,
     region: cf.region || null,
     city: cf.city || null,
-    latitude: cf.latitude || null,
-    longitude: cf.longitude || null,
-    timezone: cf.timezone || null
+    // latitude: cf.latitude || null,
+    // longitude: cf.longitude || null,
+    tz: cf.timezone || null
   };
 
-  return new Response(JSON.stringify(data, null, 2), {
+  // 如果 URL 带参数且对应字段存在，只返回该字段
+  if (params.toString()) {
+    const result = {};
+    for (const [key] of params) {
+      if (key in fullData) {
+        result[key] = fullData[key];
+      }
+    }
+    return new Response(JSON.stringify(result, null, 2), {
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "*"
+      }
+    });
+  }
+
+  // 否则返回全部数据
+  return new Response(JSON.stringify(fullData, null, 2), {
     headers: {
       "content-type": "application/json; charset=utf-8",
       "access-control-allow-origin": "*"
     }
   });
 }
+
 
 function generateHTML() {
   return `

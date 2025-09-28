@@ -51,6 +51,7 @@ async function getIPInfo(request) {
     const data = {
       ip,
       asn: cf.asn || null,
+      isp: cf.isp || null,
       org: cf.asOrganization || null,
       country: cf.country || null,
       region: cf.region || null,
@@ -83,9 +84,10 @@ async function getIPInfo(request) {
       // 只返回需要的字段
       const filtered = {
         ip: data.ip,
-        country: data.country_code,
-        asn: data.asn,
+        asn: Number(data.asn.replace(/^AS/i, "")),
+        isp: data.isp,
         org: data.org,
+        country: data.country_code,
         region: data.region,
         city: data.city,
         tz: data.timezone

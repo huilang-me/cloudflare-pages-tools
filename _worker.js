@@ -24,7 +24,6 @@ export default {
 async function getIPInfo(request) {
   const url = new URL(request.url);
   const params = url.searchParams;
-  const ua = request.headers.get("user-agent") || null;
   const cf = request.cf || {};
 
   // 1️⃣ 优先使用 ?ip=xxx 查询
@@ -51,7 +50,6 @@ async function getIPInfo(request) {
     const ip = request.headers.get("cf-connecting-ip");
     const data = {
       ip,
-      ua,
       asn: cf.asn || null,
       org: cf.asOrganization || null,
       country: cf.country || null,
@@ -81,12 +79,32 @@ async function getIPInfo(request) {
   try {
     const res = await fetch(`https://ipwhois.app/json/${queryIP}`);
     const data = await res.json();
-    return new Response(JSON.stringify(data, null, 2), {
-      headers: {
-        "content-type": "application/json; charset=utf-8",
-        "access-control-allow-origin": "*"
-      }
-    });
+    if (data.success) {
+      // 只返回需要的字段
+      const filtered = {
+        ip: data.ip,
+        country: data.country_code,
+        asn: data.asn,
+        org: data.org,
+        region: data.region,
+        city: data.city,
+        tz: data.timezone
+      };
+      return new Response(JSON.stringify(filtered, null, 2), {
+        headers: {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*"
+        }
+      });
+    } else {
+      // success 为 false 时返回完整的错误信息
+      return new Response(JSON.stringify(data, null, 2), {
+        headers: {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*"
+        }
+      });
+    }
   } catch (err) {
     return new Response(JSON.stringify({
       error: err.message || "调用第三方 API 失败",

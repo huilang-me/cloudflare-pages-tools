@@ -67,7 +67,10 @@ async function getIPInfo(request) {
       }
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: "无法获取指定 IP 信息", ip: queryIP }), {
+    return new Response(JSON.stringify({
+      error: err.message || "调用第三方 API 失败",
+      ip: queryIP
+    }, null, 2), {
       headers: {
         "content-type": "application/json; charset=utf-8",
         "access-control-allow-origin": "*"

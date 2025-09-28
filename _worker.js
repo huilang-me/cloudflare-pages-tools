@@ -51,7 +51,6 @@ async function getIPInfo(request) {
     const data = {
       ip,
       asn: cf.asn || null,
-      isp: cf.isp || null,
       org: cf.asOrganization || null,
       country: cf.country || null,
       region: cf.region || null,
@@ -85,7 +84,7 @@ async function getIPInfo(request) {
       const filtered = {
         ip: data.ip,
         asn: Number(data.asn.replace(/^AS/i, "")),
-        isp: data.isp,
+        // isp: data.isp,
         org: data.org,
         country: data.country_code,
         region: data.region,

@@ -58,9 +58,8 @@ async function getIPInfo(request) {
 
   // 4️⃣ 如果指定了 IP → 调用第三方 API 获取信息
   try {
-    const res = await fetch(`https://ipapi.co/${queryIP}/json/`);
+    const res = await fetch(`https://ipwhois.app/json/${queryIP}`);
     const data = await res.json();
-    data.ua = ua; // 添加 UA
     return new Response(JSON.stringify(data, null, 2), {
       headers: {
         "content-type": "application/json; charset=utf-8",

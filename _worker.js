@@ -84,7 +84,7 @@ async function getIPInfo(request) {
       // 只返回需要的字段
       const filtered = {
         ip: data.ip,
-        asn: Number(data.asn.replace(/^AS/i, "")),
+        asn: data.asn,
         // isp: data.isp,
         org: data.org || data.organization,
         country: data.country_code,

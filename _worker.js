@@ -8,7 +8,7 @@ export default {
     const isIPSubdomain = host.startsWith("ip.");
 
     // 条件2: 路径是 /ip
-    const isIPPath = path === "/ip";
+    const isIPPath = path === "/ip" || path.startsWith("/ip/");
 
     if (isIPSubdomain || isIPPath) {
       return getIPInfo(request);
@@ -20,36 +20,35 @@ export default {
   },
 };
 
-function getIPInfo(request) {
+async function getIPInfo(request) {
   const url = new URL(request.url);
   const params = url.searchParams;
-  
-  const ip = request.headers.get("cf-connecting-ip");
   const ua = request.headers.get("user-agent") || null;
-
   const cf = request.cf || {};
-  const fullData = {
-    ip: ip,
-    ua: ua,
-    asn: cf.asn || null,
-    org: cf.asOrganization || null,
-    country: cf.country || null,
-    region: cf.region || null,
-    city: cf.city || null,
-    // latitude: cf.latitude || null,
-    // longitude: cf.longitude || null,
-    tz: cf.timezone || null
-  };
 
-  // 如果 URL 带参数且对应字段存在，只返回该字段
-  if (params.toString()) {
-    const result = {};
-    for (const [key] of params) {
-      if (key in fullData) {
-        result[key] = fullData[key];
-      }
-    }
-    return new Response(JSON.stringify(result, null, 2), {
+  // 1️⃣ 优先使用 ?ip=xxx 查询
+  let queryIP = params.get("ip");
+
+  // 2️⃣ 如果 query 没有，再尝试从路径 /ip/xxx 获取
+  if (!queryIP) {
+    const match = url.pathname.match(/^\/ip\/(.+)$/);
+    if (match) queryIP = match[1];
+  }
+
+  // 3️⃣ 如果没有指定 IP → 使用访问者 IP + CF 信息
+  if (!queryIP) {
+    const ip = request.headers.get("cf-connecting-ip");
+    const data = {
+      ip,
+      ua,
+      asn: cf.asn || null,
+      org: cf.asOrganization || null,
+      country: cf.country || null,
+      region: cf.region || null,
+      city: cf.city || null,
+      tz: cf.timezone || null
+    };
+    return new Response(JSON.stringify(data, null, 2), {
       headers: {
         "content-type": "application/json; charset=utf-8",
         "access-control-allow-origin": "*"
@@ -57,13 +56,25 @@ function getIPInfo(request) {
     });
   }
 
-  // 否则返回全部数据
-  return new Response(JSON.stringify(fullData, null, 2), {
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "access-control-allow-origin": "*"
-    }
-  });
+  // 4️⃣ 如果指定了 IP → 调用第三方 API 获取信息
+  try {
+    const res = await fetch(`https://ipapi.co/${queryIP}/json/`);
+    const data = await res.json();
+    data.ua = ua; // 添加 UA
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "*"
+      }
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: "无法获取指定 IP 信息", ip: queryIP }), {
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "*"
+      }
+    });
+  }
 }
 
 

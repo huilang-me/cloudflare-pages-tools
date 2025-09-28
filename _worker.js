@@ -80,13 +80,13 @@ async function getIPInfo(request) {
     // const res = await fetch(`https://ipwhois.app/json/${queryIP}`);
     const res = await fetch(`https://api.ip.sb/geoip/${queryIP}`);
     const data = await res.json();
-    if (data.success) {
+    if (data.ip) {
       // 只返回需要的字段
       const filtered = {
         ip: data.ip,
         asn: Number(data.asn.replace(/^AS/i, "")),
         // isp: data.isp,
-        org: data.org,
+        org: data.org || data.organization,
         country: data.country_code,
         region: data.region,
         city: data.city,

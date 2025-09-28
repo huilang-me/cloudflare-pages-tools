@@ -56,8 +56,7 @@ async function getIPInfo(request) {
       country: cf.country || null,
       region: cf.region || null,
       city: cf.city || null,
-      tz: cf.timezone || null,
-      cf
+      tz: cf.timezone || null
     };
     return new Response(JSON.stringify(data, null, 2), {
       headers: {

@@ -1,10 +1,48 @@
 export default {
   async fetch(request) {
+
+    // 条件1: 子域名前缀是 ip.
+    const isIPSubdomain = host.startsWith("ip.");
+
+    // 条件2: 路径是 /ip 或 /ip/xxx
+    const isIPPath = path === "/ip" || path.startsWith("/ip/");
+
+    if (isIPSubdomain || isIPPath) {
+      return getIPInfo(request);
+    }
+  
     return new Response(generateHTML(), {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
   },
 };
+
+function getIPInfo(request) {
+  const url = new URL(request.url);
+  const queryIP = url.searchParams.get("ip");
+
+  let ip = queryIP || request.headers.get("cf-connecting-ip");
+  const cf = request.cf || {};
+
+  const data = {
+    ip: ip,
+    asn: cf.asn || null,
+    org: cf.asOrganization || null,
+    country: cf.country || null,
+    region: cf.region || null,
+    city: cf.city || null,
+    latitude: cf.latitude || null,
+    longitude: cf.longitude || null,
+    timezone: cf.timezone || null
+  };
+
+  return new Response(JSON.stringify(data, null, 2), {
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      "access-control-allow-origin": "*"
+    }
+  });
+}
 
 function generateHTML() {
   return `

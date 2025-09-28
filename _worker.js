@@ -77,7 +77,8 @@ async function getIPInfo(request) {
 
   // 4️⃣ 如果指定了 IP → 调用第三方 API 获取信息
   try {
-    const res = await fetch(`https://ipwhois.app/json/${queryIP}`);
+    // const res = await fetch(`https://ipwhois.app/json/${queryIP}`);
+    const res = await fetch(`https://api.ip.sb/geoip/${queryIP}`);
     const data = await res.json();
     if (data.success) {
       // 只返回需要的字段
